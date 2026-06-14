@@ -1,0 +1,8 @@
+school.db
+backups/
+__pycache__/
+*.pyc
+.env
+*.jpg
+*.png
+static/logo*
