@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة مقر — مدرسة ورش{% endblock %}
+{% block page_title %}إضافة مقر جديد{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <a class="btn btn-secondary" href="{{ url_for('departs') }}">إلغاء والعودة</a>
+</div>
+
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
+<div class="card">
+    <form method="post" action="{{ url_for('add_depart') }}">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="name">اسم المقر *</label>
+                <select id="name" name="name" required>
+                    <option value="">— اختر المقر —</option>
+                    {% for dn in depart_names %}
+                    <option value="{{ dn }}" {% if selected_name == dn %}selected{% endif %}>{{ dn }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="address">العنوان</label>
+                <select id="address" name="address">
+                    <option value="">— اختر العنوان —</option>
+                    {% for da in depart_addresses %}
+                    <option value="{{ da }}" {% if selected_address == da %}selected{% endif %}>{{ da }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="salle_count">عدد القاعات *</label>
+                <select id="salle_count" name="salle_count" required>
+                    <option value="">— اختر —</option>
+                    {% for n in range(1, 9) %}
+                    <option value="{{ n }}">{{ n }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">حفظ المقر</button>
+            <a class="btn btn-secondary" href="{{ url_for('departs') }}">إلغاء</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

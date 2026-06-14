@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}تفاصيل المجموعة — مدرسة ورش{% endblock %}
+{% block page_title %}مجموعة {{ this_class.group_number }} — {{ this_class.category_name }}{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <a class="btn btn-secondary" href="{{ url_for('classes') }}">العودة إلى المجموعات</a>
+    <a class="btn btn-primary" href="{{ url_for('add_schedule', class_id=this_class.id) }}">إضافة حصة للجدول</a>
+    <a class="btn btn-secondary" href="{{ url_for('class_payments', class_id=this_class.id) }}">المدفوعات</a>
+</div>
+
+<div class="card">
+    <h2>معلومات المجموعة</h2>
+    <p><strong>الفئة:</strong> {{ this_class.category_name }}</p>
+    <p><strong>المستوى:</strong> {{ this_class.level_name or '—' }}</p>
+    <p><strong>الأستاذ:</strong> {{ this_class.teacher_name }}</p>
+    <p><strong>رقم المجموعة:</strong> {{ this_class.group_number }}</p>
+    <p><strong>السنة الدراسية:</strong> {{ this_class.academic_year }}</p>
+</div>
+
+<h2 class="section-title">جدول الحصص</h2>
+{% if schedule %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>اليوم</th>
+            <th>وقت البداية</th>
+            <th>القاعة</th>
+            <th>المقر</th>
+            <th>الأستاذ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in schedule %}
+        <tr>
+            <td>{{ row.day_of_week }}</td>
+            <td>{{ row.start_time }}</td>
+            <td>{{ row.room_number }}</td>
+            <td>{{ row.depart_name }}</td>
+            <td>{{ row.teacher_name }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-msg">لا يوجد جدول مسجل لهذه المجموعة.</p>
+{% endif %}
+
+<h2 class="section-title">طلاب المجموعة</h2>
+{% if students %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>الاسم</th>
+            <th>اللقب</th>
+            <th>هاتف الولي</th>
+            <th>تاريخ التسجيل</th>
+            <th>إجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in students %}
+        <tr>
+            <td>{{ s.first_name }}</td>
+            <td>{{ s.last_name }}</td>
+            <td>{{ s.parent_phone }}</td>
+            <td>{{ s.enrolled_date or '—' }}</td>
+            <td>
+                <a class="btn btn-secondary btn-sm" href="{{ url_for('edit_student', student_id=s.id) }}">تعديل</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-msg">لا يوجد طلاب نشطون في هذه المجموعة.</p>
+{% endif %}
+{% endblock %}

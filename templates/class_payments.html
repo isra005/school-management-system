@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% set month_names = {
+    1: 'يناير', 2: 'فبراير', 3: 'مارس', 4: 'أبريل',
+    5: 'مايو', 6: 'يونيو', 7: 'يوليو', 8: 'أغسطس',
+    9: 'سبتمبر', 10: 'أكتوبر', 11: 'نوفمبر', 12: 'ديسمبر'
+} %}
+
+{% block title %}مدفوعات المجموعة — مدرسة ورش{% endblock %}
+{% block page_title %}مدفوعات — {{ this_class.category_name }} — {{ this_class.teacher_name }} — مجموعة {{ this_class.group_number }}{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <a class="btn btn-secondary" href="{{ url_for('payments_home') }}">العودة إلى المدفوعات</a>
+    <a class="btn btn-secondary" href="{{ url_for('view_class', class_id=this_class.id) }}">تفاصيل المجموعة</a>
+</div>
+
+{# ── Period selector ── #}
+<div class="card">
+    <p style="margin-bottom:0.75rem;">
+        <strong>نوع الدفع:</strong>
+        <span style="color:#1a2744;font-weight:700;">{{ this_class.payment_type }}</span>
+    </p>
+    <form method="get" action="{{ url_for('class_payments', class_id=this_class.id) }}">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="year">السنة</label>
+                <input type="number" id="year" name="year"
+                       value="{{ year }}" min="2020" max="2030">
+            </div>
+            {% if this_class.payment_type == 'شهريا' %}
+            <div class="form-group">
+                <label for="month">الشهر</label>
+                <select id="month" name="month">
+                    {% for m in months %}
+                    <option value="{{ m }}" {% if m == month %}selected{% endif %}>
+                        {{ month_names[m] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="form-group" style="align-self:end;">
+                <button type="submit" class="btn btn-primary">عرض</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{# ── Generate payment rows button ── #}
+{# This creates one unpaid row per active student for this period.
+   For monthly: creates row with month=X. For annual: month=NULL.
+   Safe to press again — INSERT OR IGNORE skips existing rows. #}
+<div class="toolbar">
+    <form class="inline-form" method="post"
+          action="{{ url_for('generate_payments', class_id=this_class.id) }}">
+        <input type="hidden" name="year" value="{{ year }}">
+        <input type="hidden" name="month" value="{{ month }}">
+        <button type="submit" class="btn btn-primary">
+            إنشاء سجلات المدفوعات لهذه الفترة
+        </button>
+    </form>
+    <span style="color:#5a6578;font-size:0.9rem;align-self:center;">
+        اضغط هذا الزر مرة واحدة في بداية كل
+        {% if this_class.payment_type == 'شهريا' %}شهر{% else %}سنة{% endif %}
+    </span>
+</div>
+
+{# ── Period label ── #}
+<h2 class="section-title">
+    حالة المدفوعات —
+    {% if this_class.payment_type == 'شهريا' %}
+        {{ month_names[month] }} {{ year }}
+    {% else %}
+        سنة {{ year }}
+    {% endif %}
+</h2>
+
+{# ── Payment table ── #}
+{% if payments %}
+
+{# Summary counts at top — useful at a glance #}
+{% set paid_count = payments | selectattr('paid', 'equalto', 1) | list | length %}
+{% set unpaid_count = payments | selectattr('paid', 'equalto', 0) | list | length %}
+{% set no_record_count = payments | selectattr('payment_id', 'none') | list | length %}
+
+<div style="display:flex;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+    <span class="badge-paid">✓ مدفوع: {{ paid_count }}</span>
+    <span class="badge-unpaid">✗ غير مدفوع: {{ unpaid_count }}</span>
+    {% if no_record_count > 0 %}
+    <span style="color:#5a6578;">⚠ بدون سجل: {{ no_record_count }}</span>
+    {% endif %}
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>الاسم</th>
+            <th>اللقب</th>
+            <th>المبلغ</th>
+            <th>الحالة</th>
+            <th>تاريخ الدفع</th>
+            <th>إجراء</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in payments %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ p.first_name }}</td>
+            <td>{{ p.last_name }}</td>
+            <td>
+                {% if p.amount is not none %}
+                    {{ p.amount }} دج
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+            <td>
+                {% if p.payment_id is none %}
+                    <span style="color:#5a6578;">لا يوجد سجل</span>
+                {% elif p.paid == 1 %}
+                    <span class="badge-paid">✓ مدفوع</span>
+                {% else %}
+                    <span class="badge-unpaid">✗ غير مدفوع</span>
+                {% endif %}
+            </td>
+            <td>{{ p.paid_date or '—' }}</td>
+            <td>
+                {% if p.payment_id is not none and p.paid == 0 %}
+                {# Student has a record but hasn't paid — show PAY button #}
+                <form class="inline-form" method="post"
+                      action="{{ url_for('record_payment', payment_id=p.payment_id) }}">
+                    <input type="hidden" name="class_id" value="{{ this_class.id }}">
+                    <input type="hidden" name="year" value="{{ year }}">
+                    <input type="hidden" name="month" value="{{ month }}">
+                    <button type="submit" class="btn btn-primary btn-sm">تسجيل الدفع</button>
+                </form>
+
+                {% elif p.payment_id is not none and p.paid == 1 %}
+                {# Student has paid — show UNDO button in case of mistake #}
+                <form class="inline-form" method="post"
+                      action="{{ url_for('unrecord_payment', payment_id=p.payment_id) }}">
+                    <input type="hidden" name="class_id" value="{{ this_class.id }}">
+                    <input type="hidden" name="year" value="{{ year }}">
+                    <input type="hidden" name="month" value="{{ month }}">
+                    <button type="submit" class="btn btn-warning btn-sm">إلغاء الدفع</button>
+                </form>
+
+                {% else %}
+                {# No payment record yet — tell user to generate first #}
+                <span style="color:#5a6578;font-size:0.85rem;">أنشئ السجلات أولاً</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+<p class="empty-msg">لا يوجد طلاب نشطون في هذه المجموعة.</p>
+{% endif %}
+
+{% endblock %}

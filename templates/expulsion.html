@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}مرشحو الطرد — مدرسة ورش{% endblock %}
+{% block page_title %}طلاب لم يسددوا 3 أشهر فأكثر{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <a class="btn btn-secondary" href="{{ url_for('students') }}">العودة إلى الطلاب</a>
+    <a class="btn btn-secondary" href="{{ url_for('unpaid_students') }}">كل المدفوعات غير المسددة</a>
+</div>
+
+<p style="margin-bottom:1rem;color:#5a6578;">الطلاب التاليون لديهم ثلاثة أشهر أو أكثر من المدفوعات غير المسددة وقد يكونون مرشحين للطرد.</p>
+
+{% if candidates %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>الاسم</th>
+            <th>اللقب</th>
+            <th>هاتف الولي</th>
+            <th>عدد الأشهر غير المسددة</th>
+            <th>إجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in candidates %}
+        <tr>
+            <td>{{ c.first_name }}</td>
+            <td>{{ c.last_name }}</td>
+            <td>{{ c.parent_phone }}</td>
+            <td><strong>{{ c.missed_months }}</strong></td>
+            <td>
+                <a class="btn btn-secondary btn-sm" href="{{ url_for('edit_student', student_id=c.id) }}">تعديل</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-msg">لا يوجد مرشحون للطرد حالياً.</p>
+{% endif %}
+{% endblock %}

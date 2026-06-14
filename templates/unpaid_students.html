@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% set month_names = {
+    1: 'يناير', 2: 'فبراير', 3: 'مارس', 4: 'أبريل',
+    5: 'مايو', 6: 'يونيو', 7: 'يوليو', 8: 'أغسطس',
+    9: 'سبتمبر', 10: 'أكتوبر', 11: 'نوفمبر', 12: 'ديسمبر'
+} %}
+
+{% block title %}المدفوعات غير المسددة — مدرسة ورش{% endblock %}
+{% block page_title %}المدفوعات غير المسددة{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <a class="btn btn-secondary" href="{{ url_for('classes') }}">مدفوعات حسب المجموعة</a>
+    <a class="btn btn-secondary" href="{{ url_for('expulsion_candidates') }}">مرشحو الطرد</a>
+    <a class="btn btn-secondary" href="{{ url_for('reports') }}">التقارير</a>
+</div>
+
+<div class="card">
+    <h2>تصفية حسب الفترة</h2>
+    <form method="get" action="{{ url_for('unpaid_students') }}">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="year">السنة</label>
+                <input type="number" id="year" name="year" value="{{ year }}" min="2020" max="2030">
+            </div>
+            <div class="form-group">
+                <label for="month">الشهر (اختياري — للمدفوعات الشهرية)</label>
+                <select id="month" name="month">
+                    <option value="">— الكل —</option>
+                    {% for m in months %}
+                    <option value="{{ m }}" {% if month|string == m|string %}selected{% endif %}>{{ month_names[m] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">تصفية</button>
+        </div>
+    </form>
+</div>
+
+<h2 class="section-title">قائمة غير المسددين — {{ year }}{% if month %} / {{ month_names[month|int] }}{% endif %}</h2>
+
+{% if unpaid %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>الاسم</th>
+            <th>اللقب</th>
+            <th>هاتف الولي</th>
+            <th>الفئة</th>
+            <th>الأستاذ</th>
+            <th>المجموعة</th>
+            <th>المبلغ</th>
+            <th>نوع الدفع</th>
+            <th>السنة</th>
+            <th>الشهر</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in unpaid %}
+        <tr>
+            <td>{{ u.first_name }}</td>
+            <td>{{ u.last_name }}</td>
+            <td>{{ u.parent_phone }}</td>
+            <td>{{ u.category_name }}</td>
+            <td>{{ u.teacher_name }}</td>
+            <td>{{ u.group_number }}</td>
+            <td>{{ u.amount }}</td>
+            <td>{{ u.payment_type }}</td>
+            <td>{{ u.year }}</td>
+            <td>{% if u.month %}{{ month_names[u.month] }}{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-msg">لا توجد مدفوعات غير مسددة لهذه الفترة.</p>
+{% endif %}
+{% endblock %}

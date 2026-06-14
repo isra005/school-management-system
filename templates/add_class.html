@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة مجموعة — مدرسة ورش{% endblock %}
+{% block page_title %}إضافة مجموعة جديدة{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <a class="btn btn-secondary" href="{{ url_for('classes') }}">إلغاء والعودة</a>
+</div>
+
+{% if error %}
+<p class="form-error">{{ error }}</p>
+{% endif %}
+
+<div class="card">
+    <form method="post" action="{{ url_for('add_class') }}" id="add-class-form">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="category_id">الفئة *</label>
+                <select id="category_id" name="category_id" required>
+                    <option value="">— اختر الفئة —</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="level_id">المستوى (اختياري)</label>
+                <select id="level_id" name="level_id">
+                    <option value="">بدون مستوى</option>
+                    {% for lv in levels %}
+                    <option value="{{ lv.id }}" data-category="{{ lv.category_id }}">{{ lv.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="teacher_id">الأستاذ *</label>
+                <select id="teacher_id" name="teacher_id" required>
+                    <option value="">— اختر الأستاذ —</option>
+                    {% for t in teachers %}
+                    <option value="{{ t.id }}" data-category="{{ t.category_id }}">{{ t.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="group_number">رقم المجموعة *</label>
+                <select id="group_number" name="group_number" required>
+                    <option value="">— اختر —</option>
+                    {% for n in range(1, 11) %}
+                    <option value="{{ n }}">{{ n }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="academic_year">السنة الدراسية *</label>
+                <select id="academic_year" name="academic_year" required>
+                    <option value="">— اختر السنة —</option>
+                    {% for y in academic_years %}
+                    <option value="{{ y }}">{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <h2 class="section-title">الجدول الدراسي</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="depart_id">الفرع</label>
+                <select id="depart_id">
+                    <option value="">— الكل —</option>
+                    {% for d in departs %}
+                    <option value="{{ d.id }}">{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="salle_id">القاعة *</label>
+                <select id="salle_id" name="salle_id" required>
+                    <option value="">— اختر القاعة —</option>
+                    {% for s in salles %}
+                    <option value="{{ s.id }}" data-depart-id="{{ s.depart_id }}">
+                        {{ s.room_number }} — {{ s.depart_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="day_of_week">اليوم *</label>
+                <select id="day_of_week" name="day_of_week" required>
+                    <option value="">— اختر اليوم —</option>
+                    {% for day in days %}
+                    <option value="{{ day }}">{{ day }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="start_time">الوقت *</label>
+                <input type="time" id="start_time" name="start_time" required>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">حفظ المجموعة</button>
+            <a class="btn btn-secondary" href="{{ url_for('classes') }}">إلغاء</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-error {
+        color: #8b2635;
+        background: #fde8ea;
+        border: 1px solid #e8b4b8;
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var departSelect = document.getElementById('depart_id');
+    var salleSelect = document.getElementById('salle_id');
+    if (!departSelect || !salleSelect) return;
+
+    function filterSalles() {
+        var departId = departSelect.value;
+        Array.prototype.forEach.call(salleSelect.options, function (opt) {
+            if (!opt.value) {
+                opt.hidden = false;
+                return;
+            }
+            if (!departId) {
+                opt.hidden = false;
+            } else {
+                opt.hidden = opt.getAttribute('data-depart-id') !== departId;
+            }
+        });
+        var selected = salleSelect.options[salleSelect.selectedIndex];
+        if (selected && selected.hidden) {
+            salleSelect.value = '';
+        }
+    }
+
+    departSelect.addEventListener('change', filterSalles);
+    filterSalles();
+
+    // Filter teachers by selected category
+var categorySelect = document.getElementById('category_id');
+var teacherSelect = document.getElementById('teacher_id');
+
+function filterTeachers() {
+    var categoryId = categorySelect.value;
+    Array.prototype.forEach.call(teacherSelect.options, function (opt) {
+        if (!opt.value) {
+            opt.hidden = false;
+            return;
+        }
+        if (!categoryId) {
+            opt.hidden = false;
+        } else {
+            opt.hidden = opt.getAttribute('data-category') !== categoryId;
+        }
+    });
+    var selected = teacherSelect.options[teacherSelect.selectedIndex];
+    if (selected && selected.hidden) {
+        teacherSelect.value = '';
+    }
+}
+
+categorySelect.addEventListener('change', filterTeachers);
+filterTeachers();
+
+// Filter levels by selected category
+var levelSelect = document.getElementById('level_id');
+
+function filterLevels() {
+    var categoryId = categorySelect.value;
+    Array.prototype.forEach.call(levelSelect.options, function (opt) {
+        if (!opt.value) {
+            opt.hidden = false;
+            return;
+        }
+        opt.hidden = opt.getAttribute('data-category') !== categoryId;
+    });
+    // Reset if hidden
+    var selected = levelSelect.options[levelSelect.selectedIndex];
+    if (selected && selected.hidden) {
+        levelSelect.value = '';
+    }
+}
+
+categorySelect.addEventListener('change', filterLevels);
+filterLevels();
+
+})();
+</script>
+{% endblock %}

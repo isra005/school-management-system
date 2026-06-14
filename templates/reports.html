@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% set month_names = {
+    1: 'يناير', 2: 'فبراير', 3: 'مارس', 4: 'أبريل',
+    5: 'مايو', 6: 'يونيو', 7: 'يوليو', 8: 'أغسطس',
+    9: 'سبتمبر', 10: 'أكتوبر', 11: 'نوفمبر', 12: 'ديسمبر'
+} %}
+
+{% block title %}التقارير — مدرسة ورش{% endblock %}
+{% block page_title %}التقارير الإحصائية{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>اختيار الفترة</h2>
+    <form method="get" action="{{ url_for('reports') }}">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="year">السنة</label>
+                <input type="number" id="year" name="year" value="{{ year }}" min="2020" max="2030">
+            </div>
+            <div class="form-group">
+                <label for="month">الشهر (للتقرير الشهري)</label>
+                <select id="month" name="month">
+                    {% for m in months %}
+                    <option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ month_names[m] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">تحديث التقارير</button>
+        </div>
+    </form>
+</div>
+
+<h2 class="section-title">عدد الطلاب حسب المجموعة</h2>
+{% if count_per_class %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>الفئة</th>
+            <th>الأستاذ</th>
+            <th>رقم المجموعة</th>
+            <th>عدد الطلاب</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in count_per_class %}
+        <tr>
+            <td>{{ row.category_name }}</td>
+            <td>{{ row.teacher_name }}</td>
+            <td>{{ row.group_number }}</td>
+            <td>{{ row.student_count }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-msg">لا توجد بيانات.</p>
+{% endif %}
+
+<h2 class="section-title">عدد الطلاب حسب الفئة</h2>
+{% if count_per_category %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>الفئة</th>
+            <th>عدد الطلاب</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in count_per_category %}
+        <tr>
+            <td>{{ row.category_name }}</td>
+            <td>{{ row.student_count }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<h2 class="section-title">المدفوعات الشهرية — {{ year }} / {{ month_names[month] }}</h2>
+{% if monthly_report %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>الفئة</th>
+            <th>عدد السجلات</th>
+            <th>المتوقع</th>
+            <th>المحصّل</th>
+            <th>المتبقي</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in monthly_report %}
+        <tr>
+            <td>{{ row.category_name }}</td>
+            <td>{{ row.total_students }}</td>
+            <td>{{ row.expected_total or 0 }}</td>
+            <td>{{ row.collected or 0 }}</td>
+            <td>{{ row.outstanding or 0 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-msg">لا توجد بيانات شهرية لهذه الفترة.</p>
+{% endif %}
+
+<h2 class="section-title">المدفوعات السنوية — {{ year }}</h2>
+{% if annual_report %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>الفئة</th>
+            <th>عدد السجلات</th>
+            <th>المتوقع</th>
+            <th>المحصّل</th>
+            <th>المتبقي</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in annual_report %}
+        <tr>
+            <td>{{ row.category_name }}</td>
+            <td>{{ row.total_students }}</td>
+            <td>{{ row.expected_total or 0 }}</td>
+            <td>{{ row.collected or 0 }}</td>
+            <td>{{ row.outstanding or 0 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-msg">لا توجد بيانات سنوية لهذه السنة.</p>
+{% endif %}
+
+<h2 class="section-title">مرشحو الطرد (3+ أشهر غير مسددة)</h2>
+{% if expulsion %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>الاسم</th>
+            <th>اللقب</th>
+            <th>هاتف الولي</th>
+            <th>الفئة</th>
+            <th>الأستاذ</th>
+            <th>الأشهر غير المسددة</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in expulsion %}
+        <tr>
+            <td>{{ e.first_name }}</td>
+            <td>{{ e.last_name }}</td>
+            <td>{{ e.parent_phone }}</td>
+            <td>{{ e.category_name }}</td>
+            <td>{{ e.teacher_name }}</td>
+            <td>{{ e.missed_months }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-msg">لا يوجد مرشحون للطرد.</p>
+{% endif %}
+{% endblock %}

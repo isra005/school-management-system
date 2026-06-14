@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}الرئيسية — مدرسة ورش{% endblock %}
+{% block page_title %}الرئيسية{% endblock %}
+
+{% block content %}
+<p>مرحباً بكم في نظام إدارة مدرسة ورش. اختر القسم المناسب من القائمة أدناه أو من شريط التنقل.</p>
+
+<div class="home-grid">
+    <a class="home-card" href="{{ url_for('students') }}">إدارة الطلاب</a>
+    <a class="home-card" href="{{ url_for('teachers') }}">إدارة المعلمين</a>
+    <a class="home-card" href="{{ url_for('classes') }}">المجموعات والجداول</a>
+    <a class="home-card" href="{{ url_for('unpaid_students') }}">المدفوعات غير المسددة</a>
+    <a class="home-card" href="{{ url_for('expulsion_candidates') }}">مرشحو الطرد (3 أشهر)</a>
+    <a class="home-card" href="{{ url_for('reports') }}">التقارير</a>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}المقرات — مدرسة ورش{% endblock %}
+{% block page_title %}المقرات والقاعات{% endblock %}
+
+{% block content %}
+{% if request.args.get('error') %}
+<div class="alert alert-error">{{ request.args.get('error') }}</div>
+{% endif %}
+
+<div class="toolbar">
+    <a class="btn btn-primary" href="{{ url_for('add_depart') }}">إضافة مقر</a>
+    <a class="btn btn-secondary" href="{{ url_for('add_salle') }}">إضافة قاعة</a>
+    <a class="btn btn-secondary" href="{{ url_for('classes') }}">المجموعات</a>
+</div>
+
+<h2 class="section-title">قائمة المقرات</h2>
+{% if departs %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>اسم المقر</th>
+            <th>العنوان</th>
+            <th>عدد القاعات</th>
+            <th>إجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in departs %}
+        <tr>
+            <td>{{ d.name }}</td>
+            <td>{{ d.address or '—' }}</td>
+            <td>{{ d.salle_count }}</td>
+            <td>
+                <form class="inline-form" method="post" action="{{ url_for('delete_depart', depart_id=d.id) }}">
+                    <button type="submit" class="btn btn-danger btn-sm">حذف</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-msg">لا توجد مقرات مسجلة.</p>
+{% endif %}
+
+<h2 class="section-title">قائمة القاعات</h2>
+{% if salles %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>رقم القاعة</th>
+            <th>المقر</th>
+            <th>إجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in salles %}
+        <tr>
+            <td>{{ s.room_number }}</td>
+            <td>{{ s.depart_name }}</td>
+            <td>
+                <form class="inline-form" method="post" action="{{ url_for('delete_salle', salle_id=s.id) }}">
+                    <button type="submit" class="btn btn-danger btn-sm">حذف</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-msg">لا توجد قاعات مسجلة.</p>
+{% endif %}
+{% endblock %}

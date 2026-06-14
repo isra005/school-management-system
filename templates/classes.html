@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}المجموعات — مدرسة ورش{% endblock %}
+{% block page_title %}المجموعات الدراسية{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <a class="btn btn-primary" href="{{ url_for('add_class') }}">إضافة مجموعة</a>
+    <a class="btn btn-secondary" href="{{ url_for('add_teacher') }}">إضافة أستاذ</a>
+    <a class="btn btn-secondary" href="{{ url_for('teachers') }}">قائمة الأساتذة</a>
+</div>
+
+{% if classes %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>الفئة</th>
+            <th>المستوى</th>
+            <th>الأستاذ</th>
+            <th>رقم المجموعة</th>
+            <th>السنة الدراسية</th>
+            <th>عدد الطلاب</th>
+            <th>إجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in classes %}
+        <tr>
+            <td>{{ c.category_name }}</td>
+            <td>{{ c.level_name or '—' }}</td>
+            <td>{{ c.teacher_name }}</td>
+            <td>{{ c.group_number }}</td>
+            <td>{{ c.academic_year }}</td>
+            <td>{{ c.student_count }}</td>
+            <td>
+                <a class="btn btn-secondary btn-sm" href="{{ url_for('view_class', class_id=c.id) }}">عرض</a>
+                <a class="btn btn-secondary btn-sm" href="{{ url_for('add_schedule', class_id=c.id) }}">جدول</a>
+                <a class="btn btn-secondary btn-sm" href="{{ url_for('class_payments', class_id=c.id) }}">مدفوعات</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-msg">لا توجد مجموعات مسجلة.</p>
+{% endif %}
+{% endblock %}

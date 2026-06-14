@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% set month_names = {
+    1: 'يناير', 2: 'فبراير', 3: 'مارس', 4: 'أبريل',
+    5: 'مايو', 6: 'يونيو', 7: 'يوليو', 8: 'أغسطس',
+    9: 'سبتمبر', 10: 'أكتوبر', 11: 'نوفمبر', 12: 'ديسمبر'
+} %}
+
+{% block title %}المدفوعات — مدرسة ورش{% endblock %}
+{% block page_title %}المدفوعات — اختيار المجموعة{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <a class="btn btn-secondary" href="{{ url_for('unpaid_students') }}">المدفوعات غير المسددة</a>
+    <a class="btn btn-secondary" href="{{ url_for('reports') }}">التقارير</a>
+</div>
+
+<div class="card">
+    <form method="get" action="{{ url_for('payments_home') }}">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="category_id">الفئة</label>
+                <select id="category_id" name="category_id" onchange="this.form.submit()">
+                    <option value="">— اختر الفئة —</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if selected_category|string == cat.id|string %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="class_id">المجموعة</label>
+                <select id="class_id" name="class_id" required>
+                    {% if classes %}
+                    <option value="">— اختر المجموعة —</option>
+                    {% for c in classes %}
+                    <option value="{{ c.id }}">{{ c.class_name }}</option>
+                    {% endfor %}
+                    {% else %}
+                    <option value="" disabled selected>اختر الفئة أولاً</option>
+                    {% endif %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="year">السنة</label>
+                <select id="year" name="year">
+                    {% for y in academic_years %}
+                    <option value="{{ y }}" {% if selected_year|string == y|string %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="month">الشهر</label>
+                <select id="month" name="month">
+                    {% for m in months %}
+                    <option value="{{ m }}" {% if selected_month|string == m|string %}selected{% endif %}>{{ month_names[m] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">عرض المدفوعات</button>
+        </div>
+    </form>
+    <p style="margin-top:1rem;color:#5a6578;font-size:0.9rem;">للمدفوعات السنوية، الشهر غير مطلوب.</p>
+</div>
+{% endblock %}

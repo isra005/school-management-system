@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}الطلاب — مدرسة ورش{% endblock %}
+{% block page_title %}قائمة الطلاب النشطين{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <a class="btn btn-primary" href="{{ url_for('add_student') }}">إضافة طالب</a>
+    <a class="btn btn-secondary" href="{{ url_for('search_student') }}">بحث</a>
+    <a class="btn btn-secondary" href="{{ url_for('expulsion_candidates') }}">مرشحو الطرد</a>
+</div>
+
+{% if students %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>الاسم</th>
+            <th>اللقب</th>
+            <th>اسم الولي</th>
+            <th>هاتف الولي</th>
+            <th>المجموعة</th>
+            <th>الفئة</th>
+            <th>إجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in students %}
+        <tr>
+            <td>{{ s.first_name }}</td>
+            <td>{{ s.last_name }}</td>
+            <td>{{ s.parent_name or '—' }}</td>
+            <td>{{ s.parent_phone }}</td>
+            <td>{{ s.class_name }}</td>
+            <td>{{ s.category_name }}</td>
+            <td>
+                <a class="btn btn-secondary btn-sm" href="{{ url_for('edit_student', student_id=s.id) }}">تعديل</a>
+                <form class="inline-form" method="post" action="{{ url_for('deactivate_student', student_id=s.id) }}">
+                    <button type="submit" class="btn btn-warning btn-sm">إلغاء التفعيل</button>
+                </form>
+                <form class="inline-form" method="post" action="{{ url_for('delete_student', student_id=s.id) }}">
+                    <button type="submit" class="btn btn-danger btn-sm">حذف</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-msg">لا يوجد طلاب نشطون حالياً.</p>
+{% endif %}
+{% endblock %}

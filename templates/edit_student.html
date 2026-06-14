@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}تعديل طالب — مدرسة ورش{% endblock %}
+{% block page_title %}تعديل بيانات الطالب{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <a class="btn btn-secondary" href="{{ url_for('students') }}">العودة إلى القائمة</a>
+</div>
+
+{% if student %}
+<div class="card">
+    <form method="post" action="{{ url_for('edit_student', student_id=student.id) }}">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="first_name">الاسم</label>
+                <input type="text" id="first_name" name="first_name" value="{{ student.first_name }}" required>
+            </div>
+            <div class="form-group">
+                <label for="last_name">اللقب</label>
+                <input type="text" id="last_name" name="last_name" value="{{ student.last_name }}" required>
+            </div>
+            <div class="form-group">
+                <label for="parent_name">اسم الولي</label>
+                <input type="text" id="parent_name" name="parent_name" value="{{ student.parent_name or '' }}">
+            </div>
+            <div class="form-group">
+                <label for="parent_phone">هاتف الولي</label>
+                <input type="tel" id="parent_phone" name="parent_phone" value="{{ student.parent_phone }}" required>
+            </div>
+            <div class="form-group">
+                <label for="address">العنوان</label>
+                <input type="text" id="address" name="address" value="{{ student.address or '' }}">
+            </div>
+            <div class="form-group">
+                <label for="employment_status">الحالة المهنية</label>
+                <select id="employment_status" name="employment_status">
+                    {% for status in employment_status_options %}
+                    <option value="{{ status }}" {% if student.employment_status == status %}selected{% endif %}>{{ status }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="class_id">المجموعة</label>
+                <select id="class_id" name="class_id" required>
+                    {% for c in classes %}
+                    <option value="{{ c.id }}" {% if student.class_id == c.id %}selected{% endif %}>
+                        {{ c.class_name }} — {{ c.category_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+            <a class="btn btn-secondary" href="{{ url_for('students') }}">إلغاء</a>
+        </div>
+    </form>
+</div>
+{% else %}
+<div class="alert alert-error">لم يتم العثور على الطالب.</div>
+{% endif %}
+{% endblock %}

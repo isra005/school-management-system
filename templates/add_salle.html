@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة قاعة — مدرسة ورش{% endblock %}
+{% block page_title %}إضافة قاعة جديدة{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <a class="btn btn-secondary" href="{{ url_for('departs') }}">إلغاء والعودة</a>
+</div>
+
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
+<div class="card">
+    <form method="post" action="{{ url_for('add_salle') }}">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="depart_id">المقر *</label>
+                <select id="depart_id" name="depart_id" required>
+                    <option value="">— اختر المقر —</option>
+                    {% for d in departs %}
+                    <option value="{{ d.id }}">{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="room_number">رقم القاعة *</label>
+                <select id="room_number" name="room_number" required>
+                    <option value="">— اختر القاعة —</option>
+                    {% for rn in room_numbers %}
+                    <option value="{{ rn }}">{{ rn }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">حفظ القاعة</button>
+            <a class="btn btn-secondary" href="{{ url_for('departs') }}">إلغاء</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

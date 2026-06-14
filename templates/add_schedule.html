@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة حصة — مدرسة ورش{% endblock %}
+{% block page_title %}إضافة حصة — {{ this_class.category_name }} مجموعة {{ this_class.group_number }}{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <a class="btn btn-secondary" href="{{ url_for('view_class', class_id=this_class.id) }}">العودة إلى المجموعة</a>
+</div>
+
+<div class="card">
+    <p><strong>الأستاذ الرئيسي:</strong> {{ this_class.teacher_name }}</p>
+</div>
+
+<div class="card">
+    <h2>بيانات الحصة</h2>
+    <form method="post" action="{{ url_for('add_schedule', class_id=this_class.id) }}">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="teacher_id">الأستاذ *</label>
+                <select id="teacher_id" name="teacher_id" required>
+                    <option value="">— اختر الأستاذ —</option>
+                    <option value="{{ this_class.teacher_id }}">{{ this_class.teacher_name }} (رئيسي)</option>
+                    {% for et in extra_teachers %}
+                    <option value="{{ et.id }}">{{ et.teacher_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="salle_id">القاعة والمقر *</label>
+                <select id="salle_id" name="salle_id" required>
+                    <option value="">— اختر القاعة —</option>
+                    {% for s in salles %}
+                    <option value="{{ s.id }}">{{ s.room_number }} — {{ s.depart_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="day_of_week">يوم الأسبوع *</label>
+                <select id="day_of_week" name="day_of_week" required>
+                    <option value="">— اختر اليوم —</option>
+                    {% for day in days %}
+                    <option value="{{ day }}">{{ day }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="start_time">وقت البداية *</label>
+                <input type="time" id="start_time" name="start_time" required>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">حفظ الحصة</button>
+            <a class="btn btn-secondary" href="{{ url_for('view_class', class_id=this_class.id) }}">إلغاء</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
